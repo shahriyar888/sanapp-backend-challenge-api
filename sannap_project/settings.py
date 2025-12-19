@@ -12,9 +12,13 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 
 import os
 from pathlib import Path
+from dotenv import load_dotenv
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+# Load environment variables from .env file
+load_dotenv(BASE_DIR / '.env')
 
 
 # Quick-start development settings - unsuitable for production
@@ -42,6 +46,7 @@ INSTALLED_APPS = [
     'knox',
     'drf_yasg',
     'account',
+    # 'document',
 ]
 
 MIDDLEWARE = [
@@ -78,16 +83,26 @@ WSGI_APPLICATION = 'sannap_project.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.getenv('POSTGRES_DB', 'sannap_project'),
-        'USER': os.getenv('POSTGRES_USER', 'postgres'),
-        'PASSWORD': os.getenv('POSTGRES_PASSWORD', 'postgres'),
-        'HOST': 'db',
-        'PORT': '5432',
+if DEBUG:
+    # Development database (SQLite)
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
     }
-}
+else:
+    # Production database (PostgreSQL)
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': os.getenv('POSTGRES_DB', 'sannap_project'),
+            'USER': os.getenv('POSTGRES_USER', 'postgres'),
+            'PASSWORD': os.getenv('POSTGRES_PASSWORD', 'postgres'),
+            'HOST': 'db',
+            'PORT': '5432',
+        }
+    }
 
 
 # Password validation
@@ -139,6 +154,8 @@ CACHES = {
 MINIO_ENDPOINT = os.getenv('MINIO_ENDPOINT', 'minio:9000')
 MINIO_ACCESS_KEY = os.getenv('MINIO_ROOT_USER', 'admin')
 MINIO_SECRET_KEY = os.getenv('MINIO_ROOT_PASSWORD', 'password')
+MINIO_USE_HTTPS = os.getenv('MINIO_USE_HTTPS', 'False').lower() in ['true', '1']
+MINIO_BUCKET_NAME = os.getenv('MINIO_BUCKET_NAME', 'documents')
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
