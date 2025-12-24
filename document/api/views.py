@@ -11,7 +11,7 @@ from ..storage import MinIOStorage
 
 
 class DocumentListCreateView(APIView):
-    permission_classes = [AllowAny]
+    permission_classes = [IsAuthenticated]
 
     def get_permissions(self):
         if self.request.method == 'POST':
