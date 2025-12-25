@@ -54,7 +54,8 @@ class TestLoginView:
         assert response.status_code == 400
 
     def test_login_inactive_user_400(self, api_client):
-        from django.contrib.auth.models import User
+        from django.contrib.auth import get_user_model
+        User = get_user_model()
         User.objects.create_user(
             username='inactive',
             password='testpass123',

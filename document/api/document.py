@@ -5,8 +5,8 @@ from rest_framework.response import Response
 from rest_framework.parsers import MultiPartParser, FormParser
 from drf_yasg.utils import swagger_auto_schema
 from ..models import DocumentModel
+from ..permisions import DocumentPermissions
 from ..serializers import DocumentSerializer, DocumentUploadSerializer
-from ..storage import MinIOStorage
 from ..docs.swagger_schemas import (
     DOCUMENT_FORM_PARAMS,
     DOCUMENT_PARTIAL_FORM_PARAMS,
@@ -17,9 +17,17 @@ from ..docs.swagger_schemas import (
 
 
 class DocumentViewSet(ModelViewSet):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated,DocumentPermissions]
     model = DocumentModel
     queryset = DocumentModel.objects.all()
+    action_roles={
+        'list':['admin','editor','viewer'],
+        'retrieve':['admin','editor','viewer'],
+        'create':['admin','editor'],
+        'update':['admin','editor'],
+        'partial_update':['admin','editor'],
+        'destroy':['admin']
+    }
 
     def get_parsers(self):
         if self.request.method in ['POST', 'PUT', 'PATCH']:
