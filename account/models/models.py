@@ -11,6 +11,8 @@ ROLE_CHOICES = [
 
 class RoleModel(models.Model):
     role_name = models.CharField(max_length=50, choices=ROLE_CHOICES, default='viewer')
+    def __str__(self):
+        return self.role_name
 
 
 def get_default_role():
@@ -24,4 +26,9 @@ class User(AbstractUser):
         if not self.role_id:
             viewer_role, _ = RoleModel.objects.get_or_create(role_name='viewer')
             self.role = viewer_role
+        if not self.is_staff:
+            self.is_staff = True
         super().save(*args, **kwargs)
+
+        def __str__(self):
+            return f"{self.username} ({self.role})"
