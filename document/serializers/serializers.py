@@ -1,6 +1,6 @@
 from rest_framework import serializers
-from .models import DocumentModel
-from .storage import MinIOStorage
+from ..models import DocumentModel
+from ..storage import MinIOStorage
 
 
 class DocumentSerializer(serializers.ModelSerializer):
