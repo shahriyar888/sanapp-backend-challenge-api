@@ -1,7 +1,8 @@
 from django.urls import path
-from .api.views import DocumentListCreateView, DocumentDetailView
+from .api import DocumentViewSet
+from rest_framework.routers import DefaultRouter
 
-urlpatterns = [
-    path('documents/', DocumentListCreateView.as_view(), name='document-list-create'),
-    path('documents/<int:pk>/', DocumentDetailView.as_view(), name='document-detail'),
-]
+
+router = DefaultRouter()
+router.register(r'documents', DocumentViewSet, basename='document')
+urlpatterns = router.urls

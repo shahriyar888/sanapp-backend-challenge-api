@@ -56,6 +56,10 @@ local_settings.py
 db.sqlite3
 db.sqlite3-journal
 
+# Migrations (except __init__.py)
+**/migrations/*
+!**/migrations/__init__.py
+
 # Flask stuff:
 instance/
 .webassets-cache
@@ -86,7 +90,10 @@ celerybeat-schedule
 *.sage.py
 
 # Environments
+# Environment files
 .env
+.env.development
+.env.production
 .venv
 env/
 venv/
