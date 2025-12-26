@@ -4,6 +4,7 @@ from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 from rest_framework.parsers import MultiPartParser, FormParser
 from ..models import DocumentModel
+from ..permisions import DocumentPermissions
 from ..serializers import DocumentSerializer, DocumentUploadSerializer
 from ..docs.swagger_schemas import (
     LIST_SCHEMA,
@@ -16,9 +17,17 @@ from ..docs.swagger_schemas import (
 
 
 class DocumentViewSet(ModelViewSet):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated,DocumentPermissions]
     model = DocumentModel
     queryset = DocumentModel.objects.all()
+    action_roles={
+        'list':['admin','editor','viewer'],
+        'retrieve':['admin','editor','viewer'],
+        'create':['admin','editor'],
+        'update':['admin','editor'],
+        'partial_update':['admin','editor'],
+        'destroy':['admin']
+    }
 
     def get_queryset(self):
         search_param = self.request.query_params.get('s', '')

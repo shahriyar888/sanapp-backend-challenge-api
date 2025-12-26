@@ -8,9 +8,9 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 @pytest.mark.django_db
 class TestDocumentViewSet:
     
-    def test_list_documents_success_200(self, authenticated_client, document):
+    def test_list_documents_success_200(self, viewer_client, document):
         url = reverse('document-list')
-        response = authenticated_client.get(url)
+        response = viewer_client.get(url)
         
         assert response.status_code == 200
         assert len(response.data) >= 1
@@ -57,17 +57,17 @@ class TestDocumentViewSet:
         
         assert response.status_code == 401
 
-    def test_retrieve_document_success_200(self, authenticated_client, document):
+    def test_retrieve_document_success_200(self, viewer_client, document):
         url = reverse('document-detail', kwargs={'pk': document.pk})
-        response = authenticated_client.get(url)
+        response = viewer_client.get(url)
         
         assert response.status_code == 200
         assert response.data['id'] == document.id
         assert response.data['title'] == document.title
 
-    def test_retrieve_document_not_found_404(self, authenticated_client):
+    def test_retrieve_document_not_found_404(self, viewer_client):
         url = reverse('document-detail', kwargs={'pk': 99999})
-        response = authenticated_client.get(url)
+        response = viewer_client.get(url)
         
         assert response.status_code == 404
 
@@ -78,7 +78,7 @@ class TestDocumentViewSet:
         assert response.status_code == 401
 
     @patch('document.serializers.serializers.MinIOStorage')
-    def test_create_document_success_201(self, mock_storage, authenticated_client):
+    def test_create_document_success_201(self, mock_storage, editor_client):
         mock_storage_instance = MagicMock()
         mock_storage_instance.upload_file.return_value = 'documents/test.pdf'
         mock_storage.return_value = mock_storage_instance
@@ -90,27 +90,27 @@ class TestDocumentViewSet:
             'description': 'Test description',
             'file': file
         }
-        response = authenticated_client.post(url, data, format='multipart')
+        response = editor_client.post(url, data, format='multipart')
         
         assert response.status_code == 201
         assert response.data['title'] == 'New Document'
         assert 'id' in response.data
 
-    def test_create_document_missing_file_400(self, authenticated_client):
+    def test_create_document_missing_file_400(self, editor_client):
         url = reverse('document-list')
         data = {
             'title': 'New Document',
             'description': 'Test description'
         }
-        response = authenticated_client.post(url, data)
+        response = editor_client.post(url, data)
         
         assert response.status_code == 400
 
-    def test_create_document_missing_title_400(self, authenticated_client):
+    def test_create_document_missing_title_400(self, editor_client):
         url = reverse('document-list')
         file = SimpleUploadedFile('test.pdf', b'file_content', content_type='application/pdf')
         data = {'file': file}
-        response = authenticated_client.post(url, data, format='multipart')
+        response = editor_client.post(url, data, format='multipart')
         
         assert response.status_code == 400
 
@@ -126,7 +126,7 @@ class TestDocumentViewSet:
         assert response.status_code == 401
 
     @patch('document.serializers.serializers.MinIOStorage')
-    def test_update_document_success_200(self, mock_storage, authenticated_client, document):
+    def test_update_document_success_200(self, mock_storage, editor_client, document):
         mock_storage_instance = MagicMock()
         mock_storage_instance.upload_file.return_value = 'documents/updated.pdf'
         mock_storage.return_value = mock_storage_instance
@@ -138,26 +138,26 @@ class TestDocumentViewSet:
             'description': 'Updated description',
             'file': file
         }
-        response = authenticated_client.put(url, data, format='multipart')
+        response = editor_client.put(url, data, format='multipart')
         
         assert response.status_code == 200
         assert response.data['title'] == 'Updated Document'
 
-    def test_update_document_not_found_404(self, authenticated_client):
+    def test_update_document_not_found_404(self, editor_client):
         url = reverse('document-detail', kwargs={'pk': 99999})
         file = SimpleUploadedFile('test.pdf', b'content', content_type='application/pdf')
         data = {
             'title': 'Updated',
             'file': file
         }
-        response = authenticated_client.put(url, data, format='multipart')
+        response = editor_client.put(url, data, format='multipart')
         
         assert response.status_code == 404
 
-    def test_partial_update_document_success_200(self, authenticated_client, document):
+    def test_partial_update_document_success_200(self, editor_client, document):
         url = reverse('document-detail', kwargs={'pk': document.pk})
         data = {'title': 'Partially Updated'}
-        response = authenticated_client.patch(url, data)
+        response = editor_client.patch(url, data)
         
         assert response.status_code == 200
         assert response.data['title'] == 'Partially Updated'
@@ -169,15 +169,15 @@ class TestDocumentViewSet:
         
         assert response.status_code == 401
 
-    def test_delete_document_success_204(self, authenticated_client, document):
+    def test_delete_document_success_204(self, admin_client, document):
         url = reverse('document-detail', kwargs={'pk': document.pk})
-        response = authenticated_client.delete(url)
+        response = admin_client.delete(url)
         
         assert response.status_code == 204
 
-    def test_delete_document_not_found_404(self, authenticated_client):
+    def test_delete_document_not_found_404(self, admin_client):
         url = reverse('document-detail', kwargs={'pk': 99999})
-        response = authenticated_client.delete(url)
+        response = admin_client.delete(url)
         
         assert response.status_code == 404
 
