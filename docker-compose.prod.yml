@@ -1,7 +1,5 @@
 version: '3.8'
 
-# Production: All services including web in Docker
-
 services:
   web:
     build: .
@@ -23,6 +21,31 @@ services:
       timeout: 10s
       retries: 3
 
+  celery:
+    build: .
+    command: celery -A sannap_project worker -l info
+    volumes:
+      - .:/app
+    depends_on:
+      - db
+      - redis
+      - minio
+    env_file:
+      - .env.production
+    restart: unless-stopped
+
+  celery-beat:
+    build: .
+    command: celery -A sannap_project beat -l info
+    volumes:
+      - .:/app
+    depends_on:
+      - db
+      - redis
+    env_file:
+      - .env.production
+    restart: unless-stopped
+
   db:
     image: postgres:15
     volumes:
@@ -37,6 +60,8 @@ services:
     image: redis:7-alpine
     ports:
       - "6379:6379"
+    environment:
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
     command: redis-server --requirepass ${REDIS_PASSWORD}
     restart: unless-stopped
 

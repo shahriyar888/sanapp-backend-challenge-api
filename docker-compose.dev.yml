@@ -1,8 +1,5 @@
 version: '3.8'
 
-# Development: Only services (no web container)
-# Run Django locally with: python manage.py runserver
-
 services:
   db:
     image: postgres:15
@@ -20,7 +17,7 @@ services:
     image: redis:7-alpine
     ports:
       - "6379:6379"
-    command: redis-server --requirepass ${REDIS_PASSWORD}
+    command: redis-server
     restart: unless-stopped
 
   minio:

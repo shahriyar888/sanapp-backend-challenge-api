@@ -1,0 +1,1 @@
+from .upload_tasks import upload_document_to_minio

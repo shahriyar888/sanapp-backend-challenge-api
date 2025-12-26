@@ -153,6 +153,13 @@ MINIO_SECRET_KEY = os.getenv('MINIO_ROOT_PASSWORD', 'password')
 MINIO_USE_HTTPS = os.getenv('MINIO_USE_HTTPS', 'False').lower() in ['true', '1']
 MINIO_BUCKET_NAME = os.getenv('MINIO_BUCKET_NAME', 'documents')
 
+CELERY_BROKER_URL = os.getenv('REDIS_URL', 'redis://localhost:6379/0')
+CELERY_RESULT_BACKEND = os.getenv('REDIS_URL', 'redis://localhost:6379/0')
+CELERY_ACCEPT_CONTENT = ['json']
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_SERIALIZER = 'json'
+CELERY_TIMEZONE = 'UTC'
+
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
