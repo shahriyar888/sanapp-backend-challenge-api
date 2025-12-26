@@ -1,32 +1,75 @@
-from drf_yasg import openapi
+from drf_spectacular.utils import extend_schema, OpenApiParameter
+from drf_spectacular.openapi import OpenApiTypes
 from ..serializers import DocumentSerializer
 
-# Form parameters
-DOCUMENT_FORM_PARAMS = [
-    openapi.Parameter('title', openapi.IN_FORM, type=openapi.TYPE_STRING, required=True),
-    openapi.Parameter('description', openapi.IN_FORM, type=openapi.TYPE_STRING, required=False),
-    openapi.Parameter('file', openapi.IN_FORM, type=openapi.TYPE_FILE, required=True),
-]
+# Schema definitions for document endpoints
+LIST_SCHEMA = extend_schema(
+    description="List all documents with optional search",
+    parameters=[
+        OpenApiParameter(
+            's',
+            OpenApiTypes.STR,
+            location=OpenApiParameter.QUERY,
+            description="Search term to filter documents by title, description, or filename",
+            required=False
+        )
+    ],
+    responses={200: DocumentSerializer(many=True)}
+)
 
-DOCUMENT_PARTIAL_FORM_PARAMS = [
-    openapi.Parameter('title', openapi.IN_FORM, type=openapi.TYPE_STRING, required=False),
-    openapi.Parameter('description', openapi.IN_FORM, type=openapi.TYPE_STRING, required=False),
-    openapi.Parameter('file', openapi.IN_FORM, type=openapi.TYPE_FILE, required=False),
-]
+RETRIEVE_SCHEMA = extend_schema(
+    description="Retrieve a document by ID",
+    responses={200: DocumentSerializer, 404: None}
+)
 
-# Responses
-DOCUMENT_RESPONSES = {
-    200: DocumentSerializer(),
-    400: "Bad request",
-    404: "Not found"
-}
+CREATE_SCHEMA = extend_schema(
+    description="Upload a new document",
+    request={
+        'multipart/form-data': {
+            'type': 'object',
+            'properties': {
+                'title': {'type': 'string'},
+                'description': {'type': 'string'},
+                'file': {'type': 'string', 'format': 'binary'}
+            },
+            'required': ['title', 'file']
+        }
+    },
+    responses={201: DocumentSerializer, 400: None}
+)
 
-DOCUMENT_CREATE_RESPONSES = {
-    201: DocumentSerializer(),
-    400: "Bad request"
-}
+UPDATE_SCHEMA = extend_schema(
+    description="Update a document (full update)",
+    request={
+        'multipart/form-data': {
+            'type': 'object',
+            'properties': {
+                'title': {'type': 'string'},
+                'description': {'type': 'string'},
+                'file': {'type': 'string', 'format': 'binary'}
+            },
+            'required': ['title', 'file']
+        }
+    },
+    responses={200: DocumentSerializer, 400: None, 404: None}
+)
 
-DOCUMENT_DELETE_RESPONSES = {
-    204: "No content",
-    404: "Not found"
-}
+PARTIAL_UPDATE_SCHEMA = extend_schema(
+    description="Partially update a document",
+    request={
+        'multipart/form-data': {
+            'type': 'object',
+            'properties': {
+                'title': {'type': 'string'},
+                'description': {'type': 'string'},
+                'file': {'type': 'string', 'format': 'binary'}
+            }
+        }
+    },
+    responses={200: DocumentSerializer, 400: None, 404: None}
+)
+
+DESTROY_SCHEMA = extend_schema(
+    description="Delete a document",
+    responses={204: None, 404: None}
+)

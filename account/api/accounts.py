@@ -3,18 +3,14 @@ from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 from knox.models import AuthToken
-from drf_yasg.utils import swagger_auto_schema
-from drf_yasg import openapi
 from ..serializers import RegisterSerializer, LoginSerializer, UserSerializer
+from ..docs.swagger_schemas import REGISTER_SCHEMA, LOGIN_SCHEMA, USER_PROFILE_SCHEMA
 
 
 class RegisterView(APIView):
     permission_classes = [AllowAny]
     
-    @swagger_auto_schema(
-        request_body=RegisterSerializer,
-        responses={201: openapi.Response('User created', UserSerializer)}
-    )
+    @REGISTER_SCHEMA
     def post(self, request):
         serializer = RegisterSerializer(data=request.data)
         if serializer.is_valid():
@@ -30,10 +26,7 @@ class RegisterView(APIView):
 class LoginView(APIView):
     permission_classes = [AllowAny]
     
-    @swagger_auto_schema(
-        request_body=LoginSerializer,
-        responses={200: openapi.Response('Login successful', UserSerializer)}
-    )
+    @LOGIN_SCHEMA
     def post(self, request):
         serializer = LoginSerializer(data=request.data)
         if serializer.is_valid():
@@ -49,8 +42,6 @@ class LoginView(APIView):
 class UserProfileView(APIView):
     permission_classes = [IsAuthenticated]
 
-    @swagger_auto_schema(
-        responses={200: UserSerializer}
-    )
+    @USER_PROFILE_SCHEMA
     def get(self, request):
         return Response(UserSerializer(request.user).data)

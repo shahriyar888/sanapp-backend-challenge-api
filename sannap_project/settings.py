@@ -42,7 +42,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'knox',
-    'drf_yasg',
+    'drf_spectacular',
     'account',
     'document',
 ]
@@ -164,12 +164,15 @@ REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.IsAuthenticated',
     ],
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
 }
 
-SWAGGER_SETTINGS = {
-    'USE_SESSION_AUTH': True,  # critical
-    'LOGIN_URL': 'admin:login',  # or 'rest_framework:login' if you use DRF login
-    'LOGOUT_URL': 'admin:logout',
+# drf-spectacular settings
+SPECTACULAR_SETTINGS = {
+    'TITLE': 'Sannap API',
+    'DESCRIPTION': 'Authentication API with Knox',
+    'VERSION': '1.0.0',
+    'SERVE_INCLUDE_SCHEMA': False,
 }
 
 LOGIN_URL = 'admin:login'

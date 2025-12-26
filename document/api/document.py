@@ -3,16 +3,15 @@ from rest_framework.viewsets import ModelViewSet
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 from rest_framework.parsers import MultiPartParser, FormParser
-from drf_yasg.utils import swagger_auto_schema
-from drf_yasg import openapi
 from ..models import DocumentModel
 from ..serializers import DocumentSerializer, DocumentUploadSerializer
 from ..docs.swagger_schemas import (
-    DOCUMENT_FORM_PARAMS,
-    DOCUMENT_PARTIAL_FORM_PARAMS,
-    DOCUMENT_RESPONSES,
-    DOCUMENT_CREATE_RESPONSES,
-    DOCUMENT_DELETE_RESPONSES
+    LIST_SCHEMA,
+    RETRIEVE_SCHEMA,
+    CREATE_SCHEMA,
+    UPDATE_SCHEMA,
+    PARTIAL_UPDATE_SCHEMA,
+    DESTROY_SCHEMA
 )
 
 
@@ -28,7 +27,7 @@ class DocumentViewSet(ModelViewSet):
         return DocumentModel.objects.all()
 
     def get_parsers(self):
-        if self.request.method in ['POST', 'PUT', 'PATCH']:
+        if hasattr(self, 'request') and self.request and self.request.method in ['POST', 'PUT', 'PATCH']:
             return [MultiPartParser(), FormParser()]
         return super().get_parsers()
 
@@ -42,34 +41,15 @@ class DocumentViewSet(ModelViewSet):
         context['user'] = self.request.user
         return context
 
-    @swagger_auto_schema(
-        operation_description="List all documents with optional search",
-        manual_parameters=[
-            openapi.Parameter(
-                's',
-                openapi.IN_QUERY,
-                description="Search term to filter documents by title, description, or filename",
-                type=openapi.TYPE_STRING,
-                required=False
-            )
-        ],
-        responses={200: DocumentSerializer(many=True)}
-    )
+    @LIST_SCHEMA
     def list(self, request, *args, **kwargs):
         return super().list(request, *args, **kwargs)
 
-    @swagger_auto_schema(
-        operation_description="Retrieve a document by ID",
-        responses={200: DocumentSerializer(), 404: "Not found"}
-    )
+    @RETRIEVE_SCHEMA
     def retrieve(self, request, *args, **kwargs):
         return super().retrieve(request, *args, **kwargs)
 
-    @swagger_auto_schema(
-        operation_description="Upload a new document",
-        manual_parameters=DOCUMENT_FORM_PARAMS,
-        responses=DOCUMENT_CREATE_RESPONSES
-    )
+    @CREATE_SCHEMA
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(
             data=request.data,
@@ -81,11 +61,7 @@ class DocumentViewSet(ModelViewSet):
         headers = self.get_success_headers(output_serializer.data)
         return Response(output_serializer.data, status=status.HTTP_201_CREATED, headers=headers)
 
-    @swagger_auto_schema(
-        operation_description="Update a document (full update)",
-        manual_parameters=DOCUMENT_FORM_PARAMS,
-        responses=DOCUMENT_RESPONSES
-    )
+    @UPDATE_SCHEMA
     def update(self, request, *args, **kwargs):
         partial = kwargs.pop('partial', False)
         instance = self.get_object()
@@ -100,17 +76,10 @@ class DocumentViewSet(ModelViewSet):
         output_serializer = DocumentSerializer(document)
         return Response(output_serializer.data)
 
-    @swagger_auto_schema(
-        operation_description="Partially update a document",
-        manual_parameters=DOCUMENT_PARTIAL_FORM_PARAMS,
-        responses=DOCUMENT_RESPONSES
-    )
+    @PARTIAL_UPDATE_SCHEMA
     def partial_update(self, request, *args, **kwargs):
         return super().partial_update(request, *args, **kwargs)
 
-    @swagger_auto_schema(
-        operation_description="Delete a document",
-        responses=DOCUMENT_DELETE_RESPONSES
-    )
+    @DESTROY_SCHEMA
     def destroy(self, request, *args, **kwargs):
         return super().destroy(request, *args, **kwargs)
