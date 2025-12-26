@@ -15,6 +15,42 @@ class TestDocumentViewSet:
         assert response.status_code == 200
         assert len(response.data) >= 1
 
+    def test_search_documents_by_title(self, authenticated_client, document):
+        url = reverse('document-list')
+        response = authenticated_client.get(url, {'s': document.title})
+        
+        assert response.status_code == 200
+        assert len(response.data) >= 1
+        assert document.title in [doc['title'] for doc in response.data]
+
+    def test_search_documents_by_description(self, authenticated_client, document):
+        url = reverse('document-list')
+        response = authenticated_client.get(url, {'s': document.description})
+        
+        assert response.status_code == 200
+        assert len(response.data) >= 1
+
+    def test_search_documents_by_filename(self, authenticated_client, document):
+        url = reverse('document-list')
+        response = authenticated_client.get(url, {'s': document.file_name})
+        
+        assert response.status_code == 200
+        assert len(response.data) >= 1
+
+    def test_search_documents_no_results(self, authenticated_client, document):
+        url = reverse('document-list')
+        response = authenticated_client.get(url, {'s': 'nonexistent'})
+        
+        assert response.status_code == 200
+        assert len(response.data) == 0
+
+    def test_search_documents_empty_query(self, authenticated_client, document):
+        url = reverse('document-list')
+        response = authenticated_client.get(url, {'s': ''})
+        
+        assert response.status_code == 200
+        assert len(response.data) >= 1
+
     def test_list_documents_unauthorized_401(self, api_client):
         url = reverse('document-list')
         response = api_client.get(url)
