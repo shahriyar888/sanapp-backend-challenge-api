@@ -3,6 +3,7 @@ from rest_framework.viewsets import ModelViewSet
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 from rest_framework.parsers import MultiPartParser, FormParser
+from rest_framework.decorators import action
 from ..models import DocumentModel
 from ..permisions import DocumentPermissions
 from ..serializers import DocumentSerializer, DocumentUploadSerializer
@@ -26,7 +27,8 @@ class DocumentViewSet(ModelViewSet):
         'create':['admin','editor'],
         'update':['admin','editor'],
         'partial_update':['admin','editor'],
-        'destroy':['admin']
+        'destroy':['admin'],
+        'status':['admin','editor','viewer']
     }
 
     def get_queryset(self):
@@ -92,3 +94,12 @@ class DocumentViewSet(ModelViewSet):
     @DESTROY_SCHEMA
     def destroy(self, request, *args, **kwargs):
         return super().destroy(request, *args, **kwargs)
+
+    @action(detail=True, methods=['get'])
+    def status(self, request, pk=None):
+        document = self.get_object()
+        return Response({
+            'id': document.id,
+            'status': document.status,
+            'error_message': document.error_message
+        })
