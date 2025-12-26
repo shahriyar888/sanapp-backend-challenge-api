@@ -8,3 +8,5 @@ README.md
 Dockerfile
 .dockerignore
 .env
+**/migrations/[0-9]*.py
+!**/migrations/__init__.py
