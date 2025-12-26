@@ -7,8 +7,10 @@ while ! nc -z db 5432; do
 done
 echo "Database started"
 
-# Run migrations
+#Run migrations
 echo "Running migrations..."
+
+python manage.py makemigrations
 python manage.py migrate
 
 # Collect static files

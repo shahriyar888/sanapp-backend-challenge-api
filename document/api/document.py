@@ -4,6 +4,7 @@ from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 from rest_framework.parsers import MultiPartParser, FormParser
 from drf_yasg.utils import swagger_auto_schema
+from drf_yasg import openapi
 from ..models import DocumentModel
 from ..permisions import DocumentPermissions
 from ..serializers import DocumentSerializer, DocumentUploadSerializer
@@ -29,6 +30,12 @@ class DocumentViewSet(ModelViewSet):
         'destroy':['admin']
     }
 
+    def get_queryset(self):
+        search_param = self.request.query_params.get('s', '')
+        if search_param:
+            return DocumentModel.objects.search(s=search_param)
+        return DocumentModel.objects.all()
+
     def get_parsers(self):
         if self.request.method in ['POST', 'PUT', 'PATCH']:
             return [MultiPartParser(), FormParser()]
@@ -45,7 +52,16 @@ class DocumentViewSet(ModelViewSet):
         return context
 
     @swagger_auto_schema(
-        operation_description="List all documents",
+        operation_description="List all documents with optional search",
+        manual_parameters=[
+            openapi.Parameter(
+                's',
+                openapi.IN_QUERY,
+                description="Search term to filter documents by title, description, or filename",
+                type=openapi.TYPE_STRING,
+                required=False
+            )
+        ],
         responses={200: DocumentSerializer(many=True)}
     )
     def list(self, request, *args, **kwargs):
