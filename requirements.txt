@@ -14,3 +14,4 @@ pytest-django==4.7.0
 model-bakery==1.17.0
 faker==22.0.0
 celery==5.3.4
+django-auditlog==2.3.0

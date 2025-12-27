@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'knox',
     'drf_spectacular',
+    'auditlog',
     'account',
     'document',
 ]
@@ -59,6 +60,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'auditlog.middleware.AuditlogMiddleware',
 ]
 
 ROOT_URLCONF = 'sannap_project.urls'
