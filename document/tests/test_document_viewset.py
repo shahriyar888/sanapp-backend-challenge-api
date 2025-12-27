@@ -77,12 +77,8 @@ class TestDocumentViewSet:
         
         assert response.status_code == 401
 
-    @patch('document.serializers.serializers.MinIOStorage')
-    def test_create_document_success_201(self, mock_storage, editor_client):
-        mock_storage_instance = MagicMock()
-        mock_storage_instance.upload_file.return_value = 'documents/test.pdf'
-        mock_storage.return_value = mock_storage_instance
-        
+    @patch('document.tasks.upload_tasks.upload_document_to_minio.delay')
+    def test_create_document_success_201(self, mock_task, editor_client):
         url = reverse('document-list')
         file = SimpleUploadedFile('test.pdf', b'file_content', content_type='application/pdf')
         data = {
@@ -125,12 +121,8 @@ class TestDocumentViewSet:
         
         assert response.status_code == 401
 
-    @patch('document.serializers.serializers.MinIOStorage')
-    def test_update_document_success_200(self, mock_storage, editor_client, document):
-        mock_storage_instance = MagicMock()
-        mock_storage_instance.upload_file.return_value = 'documents/updated.pdf'
-        mock_storage.return_value = mock_storage_instance
-        
+    @patch('document.tasks.upload_tasks.upload_document_to_minio.delay')
+    def test_update_document_success_200(self, mock_task, editor_client, document):
         url = reverse('document-detail', kwargs={'pk': document.pk})
         file = SimpleUploadedFile('updated.pdf', b'new_content', content_type='application/pdf')
         data = {

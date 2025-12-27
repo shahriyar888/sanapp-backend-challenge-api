@@ -37,11 +37,8 @@ class TestDocumentRBAC:
         response = viewer_client.get(url)
         assert response.status_code == 200
 
-    @patch('document.serializers.serializers.MinIOStorage')
-    def test_admin_can_create_document(self, mock_storage, admin_client):
-        mock_storage_instance = MagicMock()
-        mock_storage_instance.upload_file.return_value = 'documents/test.pdf'
-        mock_storage.return_value = mock_storage_instance
+    @patch('document.tasks.upload_tasks.upload_document_to_minio.delay')
+    def test_admin_can_create_document(self, mock_task, admin_client):
         
         url = reverse('document-list')
         file = SimpleUploadedFile('test.pdf', b'content', content_type='application/pdf')
@@ -49,11 +46,8 @@ class TestDocumentRBAC:
         response = admin_client.post(url, data, format='multipart')
         assert response.status_code == 201
 
-    @patch('document.serializers.serializers.MinIOStorage')
-    def test_editor_can_create_document(self, mock_storage, editor_client):
-        mock_storage_instance = MagicMock()
-        mock_storage_instance.upload_file.return_value = 'documents/test.pdf'
-        mock_storage.return_value = mock_storage_instance
+    @patch('document.tasks.upload_tasks.upload_document_to_minio.delay')
+    def test_editor_can_create_document(self, mock_task, editor_client):
         
         url = reverse('document-list')
         file = SimpleUploadedFile('test.pdf', b'content', content_type='application/pdf')
@@ -68,11 +62,8 @@ class TestDocumentRBAC:
         response = viewer_client.post(url, data, format='multipart')
         assert response.status_code == 403
 
-    @patch('document.serializers.serializers.MinIOStorage')
-    def test_admin_can_update_document(self, mock_storage, admin_client, document):
-        mock_storage_instance = MagicMock()
-        mock_storage_instance.upload_file.return_value = 'documents/updated.pdf'
-        mock_storage.return_value = mock_storage_instance
+    @patch('document.tasks.upload_tasks.upload_document_to_minio.delay')
+    def test_admin_can_update_document(self, mock_task, admin_client, document):
         
         url = reverse('document-detail', kwargs={'pk': document.pk})
         file = SimpleUploadedFile('updated.pdf', b'content', content_type='application/pdf')
@@ -80,11 +71,8 @@ class TestDocumentRBAC:
         response = admin_client.put(url, data, format='multipart')
         assert response.status_code == 200
 
-    @patch('document.serializers.serializers.MinIOStorage')
-    def test_editor_can_update_document(self, mock_storage, editor_client, document):
-        mock_storage_instance = MagicMock()
-        mock_storage_instance.upload_file.return_value = 'documents/updated.pdf'
-        mock_storage.return_value = mock_storage_instance
+    @patch('document.tasks.upload_tasks.upload_document_to_minio.delay')
+    def test_editor_can_update_document(self, mock_task, editor_client, document):
         
         url = reverse('document-detail', kwargs={'pk': document.pk})
         file = SimpleUploadedFile('updated.pdf', b'content', content_type='application/pdf')
