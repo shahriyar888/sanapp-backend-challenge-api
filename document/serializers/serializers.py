@@ -1,18 +1,28 @@
 import base64
 from rest_framework import serializers
+from django.urls import reverse
 from ..models import DocumentModel
 from ..tasks import upload_document_to_minio
 
 
 class DocumentSerializer(serializers.ModelSerializer):
     uploaded_by = serializers.StringRelatedField(read_only=True)
+    download_url = serializers.SerializerMethodField()
 
     class Meta:
         model = DocumentModel
         fields = ['id', 'title', 'description', 'file_name', 'file_size',
-                  'content_type', 'status', 'error_message', 'uploaded_by', 'created_at', 'updated_at']
+                  'content_type', 'status', 'error_message', 'uploaded_by', 
+                  'created_at', 'updated_at', 'download_url']
         read_only_fields = ['id', 'file_name', 'file_size', 'content_type', 'status',
-                           'error_message', 'uploaded_by', 'created_at', 'updated_at']
+                           'error_message', 'uploaded_by', 'created_at', 'updated_at', 'download_url']
+
+    def get_download_url(self, obj):
+        if obj.status == 'COMPLETED' and obj.file_path:
+            from ..storage import MinIOStorage
+            storage = MinIOStorage()
+            return storage.get_file_url(obj.file_path)
+        return None
 
 
 class DocumentUploadSerializer(serializers.Serializer):

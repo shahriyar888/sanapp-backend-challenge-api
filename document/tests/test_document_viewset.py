@@ -178,3 +178,17 @@ class TestDocumentViewSet:
         response = api_client.delete(url)
         
         assert response.status_code == 401
+
+    @patch('document.storage.MinIOStorage.get_file_url')
+    def test_download_document_success_200(self, mock_get_url, viewer_client, document):
+        mock_get_url.return_value = 'http://minio:9000/bucket/file.pdf?signed=true'
+        document.status = 'COMPLETED'
+        document.file_path = 'test-file.pdf'
+        document.save()
+        
+        url = reverse('document-download', kwargs={'pk': document.pk})
+        response = viewer_client.get(url)
+        
+        assert response.status_code == 200
+        assert 'download_url' in response.data
+        mock_get_url.assert_called_once_with('test-file.pdf')

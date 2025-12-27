@@ -4,9 +4,11 @@ from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.decorators import action
+from django.http import HttpResponse
 from ..models import DocumentModel
 from ..permisions import DocumentPermissions
 from ..serializers import DocumentSerializer, DocumentUploadSerializer
+from ..storage import MinIOStorage
 from ..docs.swagger_schemas import (
     LIST_SCHEMA,
     RETRIEVE_SCHEMA,
@@ -28,7 +30,8 @@ class DocumentViewSet(ModelViewSet):
         'update':['admin','editor'],
         'partial_update':['admin','editor'],
         'destroy':['admin'],
-        'status':['admin','editor','viewer']
+        'status':['admin','editor','viewer'],
+        'download':['admin','editor','viewer']
     }
 
     def get_queryset(self):
@@ -103,3 +106,10 @@ class DocumentViewSet(ModelViewSet):
             'status': document.status,
             'error_message': document.error_message
         })
+
+    @action(detail=True, methods=['get'])
+    def download(self, request, pk=None):
+        document = self.get_object()
+        storage = MinIOStorage()
+        file_url = storage.get_file_url(document.file_path)
+        return Response({'download_url': file_url})
